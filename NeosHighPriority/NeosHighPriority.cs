@@ -2,51 +2,61 @@ using NeosModLoader;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 
 namespace NeosHighPriority
 {
     public class NeosHighPriority : NeosMod
     {
-        internal const string VERSION = "1.0.2";
+        internal const string VERSION = "1.0.3";
 
         public override string Name => "NeosHighPriority";
         public override string Author => "runtime";
         public override string Version => VERSION;
         public override string Link => "https://github.com/zkxs/NeosHighPriority";
 
-        const ProcessPriorityClass TARGET_PRIORITY = ProcessPriorityClass.High;
-
         public override void OnEngineInit()
         {
             Debug("Getting current process...");
             using (Process currentProcess = Process.GetCurrentProcess())
             {
-                Debug("Running ProcessPriorityClass check...");
-                if (Enum.IsDefined(typeof(ProcessPriorityClass), TARGET_PRIORITY))
+                // attempt to go all the way up
+                if (!ChangePriority(currentProcess, ProcessPriorityClass.High, "High"))
                 {
-                    Debug("Backing up old priority...");
-                    ProcessPriorityClass oldPriority = currentProcess.PriorityClass;
-                    Debug("About to set priority to High");
-                    try
-                    {
-                        currentProcess.PriorityClass = TARGET_PRIORITY;
-                        Msg($"Changed process priority from {oldPriority} to {currentProcess.PriorityClass}");
-                    }
-                    catch (Win32Exception e)
-                    {
-                        Error($"Unable to change process priority from {oldPriority} to {TARGET_PRIORITY}: {e}");
-                    }
+                    // fallback attempt at a lower priority
+                    ChangePriority(currentProcess, ProcessPriorityClass.AboveNormal, "AboveNormal");
                 }
-                else
+            }
+        }
+
+        private bool ChangePriority(Process process, ProcessPriorityClass targetPriority, string targetPriorityName)
+        {
+            DebugFunc(() => $"Running ProcessPriorityClass.{targetPriorityName} check...");
+            if (Enum.IsDefined(typeof(ProcessPriorityClass), targetPriority))
+            {
+                Debug("Backing up current priority...");
+                ProcessPriorityClass oldPriority = process.PriorityClass;
+                DebugFunc(() => $"About to set priority to {targetPriorityName}");
+                try
                 {
-                    Warn("High priority is not valid!? Enumerating valid ProcessPriorityClass values:");
-                    foreach (int value in Enum.GetValues(typeof(ProcessPriorityClass)))
-                    {
-                        string name = Enum.GetName(typeof(ProcessPriorityClass), value);
-                        Warn($"{value} = {name}");
-                    }
+                    process.PriorityClass = targetPriority;
+                    Msg($"Changed process priority from {oldPriority} to {process.PriorityClass}");
+                    return true;
                 }
+                catch (Win32Exception e)
+                {
+                    Error($"Unable to change process priority from {oldPriority} to {targetPriority}: {e}");
+                    return false;
+                }
+            }
+            else
+            {
+                Warn($"{targetPriority} = {targetPriorityName} priority is not valid!? Enumerating valid ProcessPriorityClass values:");
+                foreach (int value in Enum.GetValues(typeof(ProcessPriorityClass)))
+                {
+                    string name = Enum.GetName(typeof(ProcessPriorityClass), value);
+                    Warn($"{value} = {name}");
+                }
+                return false;
             }
         }
     }
