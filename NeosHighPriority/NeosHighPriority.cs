@@ -14,9 +14,12 @@ namespace NeosHighPriority
 
         public override void OnEngineInit()
         {
+            Debug("About to get current process");
             using (Process p = Process.GetCurrentProcess())
             {
+                Debug("About to back up old priority");
                 var oldPriority = p.PriorityClass;
+                Debug("About to set priority to High");
                 p.PriorityClass = ProcessPriorityClass.High;
                 Msg($"Changed process priority from {oldPriority} to {p.PriorityClass}");
             }
