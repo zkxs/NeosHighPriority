@@ -5,9 +5,11 @@ namespace NeosHighPriority
 {
     public class NeosHighPriority : NeosMod
     {
+        internal const string VERSION = "1.0.1";
+
         public override string Name => "NeosHighPriority";
         public override string Author => "runtime";
-        public override string Version => "1.0.0";
+        public override string Version => VERSION;
         public override string Link => "https://github.com/zkxs/NeosHighPriority";
 
         public override void OnEngineInit()
