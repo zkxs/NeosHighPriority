@@ -1,4 +1,4 @@
-﻿using NeosModLoader;
+using NeosModLoader;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -23,7 +23,8 @@ namespace NeosHighPriority
             using (Process currentProcess = Process.GetCurrentProcess())
             {
                 Debug("Running ProcessPriorityClass check...");
-                if (Enum.IsDefined(typeof(ProcessPriorityClass), TARGET_PRIORITY)) {
+                if (Enum.IsDefined(typeof(ProcessPriorityClass), TARGET_PRIORITY))
+                {
                     Debug("Backing up old priority...");
                     ProcessPriorityClass oldPriority = currentProcess.PriorityClass;
                     Debug("About to set priority to High");
@@ -40,7 +41,8 @@ namespace NeosHighPriority
                 else
                 {
                     Warn("High priority is not valid!? Enumerating valid ProcessPriorityClass values:");
-                    foreach (int value in Enum.GetValues(typeof(ProcessPriorityClass))) {
+                    foreach (int value in Enum.GetValues(typeof(ProcessPriorityClass)))
+                    {
                         string name = Enum.GetName(typeof(ProcessPriorityClass), value);
                         Warn($"{value} = {name}");
                     }
